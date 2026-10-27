@@ -60,7 +60,17 @@
   /* featured chip */
   .feature { border: 1px solid var(--text); padding: 26px 24px; display: grid; grid-template-columns: 1fr 220px; gap: 28px; align-items: start; }
   .die { margin: -26px -24px 24px; grid-column: 1 / -1; border-bottom: 1px solid var(--text); background: #000; }
-  .die img { display: block; width: 100%; height: 380px; padding: 24px 0 12px; object-fit: contain; background: #000; }
+  .die-stage { padding: 24px 0 12px; background: #000; }
+  .die-box { position: relative; height: 344px; aspect-ratio: 1 / 1; margin: 0 auto; max-width: 100%; }
+  .die-box img { display: block; width: 100%; height: 100%; }
+  .die-box svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .die-box .r { fill: var(--accent); fill-opacity: 0; stroke: var(--accent); stroke-opacity: 0; stroke-width: .5; cursor: pointer; transition: fill-opacity .25s, stroke-opacity .25s; outline: none; }
+  .die-box:hover .r { stroke-opacity: .45; stroke-dasharray: 1.2 1; }
+  .die-box .r:hover, .die-box .r:focus-visible, .die-box .r.on { fill-opacity: .22; stroke-opacity: 1; stroke-dasharray: none; }
+  .die-box .r.ring:hover, .die-box .r.ring.on, .die-box .r.ring:focus-visible { fill-opacity: .14; }
+  .die figcaption #die-info { color: #efece6; }
+  .die figcaption span:last-child { white-space: nowrap; }
+  .die figcaption #die-info b { color: #e09a5f; font-weight: 500; }
   .die figcaption { font-family: var(--mono); font-size: 11px; color: #b9b4ab; background: #000; padding: 6px 12px; display: flex; justify-content: space-between; gap: 12px; }
   .feature h3 { font-family: var(--serif); font-weight: 500; font-size: 26px; line-height: 1.25; margin-top: 6px; }
   .feature p { color: var(--muted); font-size: 15px; margin-top: 8px; }
@@ -81,6 +91,25 @@
   .metric { font-family: var(--mono); font-size: 12.5px; margin-top: 8px; }
   .tags { font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 6px; }
   .tags span + span::before { content: " / "; }
+
+  /* boot line under the name: Argo's real POST output from gate-level sim */
+  .boot { font-family: var(--mono); font-size: 12.5px; color: var(--muted); margin-top: 10px; min-height: 1.7em; white-space: pre; overflow: hidden; }
+  .boot .ok { color: var(--accent); }
+  .boot .cur { display: inline-block; width: .6em; height: 1.05em; background: var(--accent); vertical-align: -2px; margin-left: 2px; animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* tapeout tracker */
+  .track { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 18px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .track li { position: relative; padding-top: 16px; }
+  .track li::before { content: ""; position: absolute; top: 4px; left: 0; right: 0; height: 1px; background: var(--line); }
+  .track li::after { content: ""; position: absolute; top: 0; left: 0; width: 9px; height: 9px; border: 1px solid var(--muted); background: var(--bg); }
+  .track li.done { color: var(--text); }
+  .track li.done::before { background: var(--text); }
+  .track li.done::after { background: var(--text); border-color: var(--text); }
+  .track li.now { color: var(--accent); }
+  .track li.now::after { background: var(--accent); border-color: var(--accent); animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .track small { display: block; color: var(--muted); font-size: 10.5px; }
 
   /* rows */
   .rows { border-top: 1px solid var(--text); }
@@ -104,12 +133,14 @@
     header { flex-direction: column; align-items: flex-start; gap: 16px; }
     h1 { font-size: 34px; }
     .feature { grid-template-columns: 1fr; }
-    .die img { height: 290px; padding: 18px 0 10px; }
+    .die-box { height: auto; width: min(100%, 300px); }
+    .track { font-size: 10px; }
     .stats { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 16px; grid-template-columns: 1fr 1fr; }
     .row, .skills dl { grid-template-columns: 1fr; gap: 0; }
     .skills dd { margin-bottom: 10px; }
   }
   @media (prefers-reduced-motion: reduce) {
+    .boot .cur, .track li.now::after { animation: none; }
     .fade { opacity: 1; transform: none; transition: none; }
     .scale .ruler, .scale .tick { animation: none; stroke-dashoffset: 0; opacity: 1; }
   }
@@ -124,6 +155,7 @@
       <div>
         <h1>Rakshith Suresh</h1>
         <div class="sub">MS Electrical Engineering, USC Viterbi &middot; VLSI physical design and design verification</div>
+        <div class="boot" id="boot" aria-label="Argo boot log: 462 words loaded over SPI, run, POST passed">&gt; argo: spi 462 words, run, POST:I+D+A+S+</div>
       </div>
     </header>
 
@@ -160,12 +192,30 @@
   <section class="block fade">
     <div class="block-head"><div class="label">Current chip</div></div>
     <div class="feature">
-      <figure class="die"><img src="argo_die.jpg" alt="Argo layout: two SRAM macros in the core, the SRAM test block at top right, pad ring around the edge" loading="lazy"><figcaption><span>Argo v2.2 layout, KLayout render</span><span>2.2 x 2.2 mm</span></figcaption></figure>
+      <figure class="die">
+        <div class="die-stage"><div class="die-box">
+          <img src="argo_die.jpg" alt="Argo layout: two SRAM macros in the core, the SRAM test block at top right, pad ring around the edge" loading="lazy">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Argo floorplan, select a block">
+            <path class="r ring" tabindex="0" fill-rule="evenodd" d="M1 1H99V99H1Z M15 15V86H86V15Z" data-t="IO ring" data-d="16 pads on 70 &micro;m bond pads: 7 inputs, 2 outputs, 7 supply, plus ESD and clamp cells"><title>IO ring</title></path>
+            <rect class="r" tabindex="0" x="15.5" y="15.5" width="70" height="70" data-t="Standard-cell logic" data-d="PicoRV32 (RV32IM), 8x8 int8 systolic array, SPI boot loader and UART, about 70k cells"><title>Standard-cell logic</title></rect>
+            <rect class="r" tabindex="0" x="34.3" y="23.6" width="22.6" height="16" data-t="4 KB SRAM" data-d="IHP 1024x32 macro behind a word controller. One holds code, the other data"><title>4 KB SRAM</title></rect>
+            <rect class="r" tabindex="0" x="35" y="67.3" width="22.2" height="17.3" data-t="4 KB SRAM" data-d="IHP 1024x32 macro behind a word controller. One holds code, the other data"><title>4 KB SRAM</title></rect>
+            <rect class="r" tabindex="0" x="66.4" y="14.2" width="19.6" height="9.4" data-t="SRAM test block" data-d="2 KB 6T test macro on its own VDD_SRAM pad. A strap pin detaches it so it can never hang the chip"><title>SRAM test block</title></rect>
+          </svg>
+        </div></div>
+        <figcaption><span id="die-info">Argo v2.2 layout. Hover or tap a block</span><span>2.2 x 2.2 mm</span></figcaption>
+      </figure>
       <div>
         <div class="kind"><b>SILICON</b>IHP SG13CMOS5L, 130 nm</div>
         <h3><a href="https://github.com/RakshithSuresh2001/argo-rv32-systolic-ihp130">Argo: RISC-V SoC with an 8x8 int8 systolic array</a></h3>
         <p>PicoRV32 (RV32IM), two 4 KB SRAM macros, a detachable SRAM test block on its own supply, SPI boot loader, UART and a 16-pad IO ring. Signed off with KLayout only. Gate-level simulation of a power-on self-test caught a multiply hang that I traced to X-pessimism in a counter with no reset.</p>
         <div class="tags"><span>LibreLane</span><span>OpenROAD</span><span>KLayout DRC/LVS</span><span>Icarus GLS</span><span>Verilator</span></div>
+        <ol class="track" aria-label="Tapeout status">
+          <li class="done">RTL<small>verified</small></li>
+          <li class="done">Signoff<small>v2.2</small></li>
+          <li class="now">Fabrication<small>IHP</small></li>
+          <li>Bring-up<small>next</small></li>
+        </ol>
       </div>
       <div class="stats">
         <div class="stat"><div class="v">0 / 0</div><div class="k">DRC / LVS errors</div></div>
@@ -242,6 +292,7 @@
     </div>
   </section>
 
+
   <section class="block skills fade">
     <div class="block-head"><div class="label">Tools</div></div>
     <dl>
@@ -271,6 +322,36 @@
       root.setAttribute("data-theme", next);
       try { localStorage.setItem(key, next); } catch (e) {}
     });
+    // interactive die
+    var info = document.getElementById("die-info"), def = info.innerHTML, cur = null;
+    document.querySelectorAll(".die-box .r").forEach(function (r) {
+      function show() { info.innerHTML = "<b>" + r.getAttribute("data-t") + "</b> &middot; " + r.getAttribute("data-d"); }
+      r.addEventListener("mouseenter", show);
+      r.addEventListener("focus", show);
+      r.addEventListener("mouseleave", function () { if (cur) { cur.dispatchEvent(new Event("focus")); } else info.innerHTML = def; });
+      r.addEventListener("click", function () {
+        if (cur) cur.classList.remove("on");
+        if (cur === r) { cur = null; info.innerHTML = def; return; }
+        cur = r; r.classList.add("on"); show();
+      });
+    });
+
+    // boot line: types Argo's real gate-level POST output
+    var boot = document.getElementById("boot");
+    var lines = [["> spi: 462 words loaded", ""], ["> run", ""], ["> ", "POST:I+D+A+S+"]];
+    var still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    function render(t, ok) { boot.innerHTML = ""; boot.appendChild(document.createTextNode(t));
+      if (ok) { var s = document.createElement("span"); s.className = "ok"; s.textContent = ok; boot.appendChild(s); }
+      var c = document.createElement("span"); c.className = "cur"; boot.appendChild(c); }
+    if (still) render("> ", "POST:I+D+A+S+");
+    else (function step(li, ch) {
+      var l = lines[li], full = l[0] + l[1];
+      if (ch <= full.length) {
+        var head = full.slice(0, Math.min(ch, l[0].length)), ok = ch > l[0].length ? l[1].slice(0, ch - l[0].length) : "";
+        render(head, ok); setTimeout(function () { step(li, ch + 1); }, 38);
+      } else if (li < lines.length - 1) setTimeout(function () { step(li + 1, 0); }, 650);
+    })(0, 0);
+
     var els = document.querySelectorAll(".fade");
     if (!("IntersectionObserver" in window)) { els.forEach(function (e) { e.classList.add("in"); }); return; }
     var io = new IntersectionObserver(function (es) {
