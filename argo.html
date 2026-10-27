@@ -142,7 +142,7 @@
       <div class="crumb"><a href="index.html">Home</a> / Argo</div>
       <h1>Argo: a RISC-V SoC on IHP 130 nm</h1>
       <p class="sub">A PicoRV32 core with an 8x8 int8 systolic array, taken from RTL to signoff-clean GDS on IHP SG13CMOS5L with open-source tools and KLayout-only signoff.</p>
-      <span class="badge">v2.2 signed off · tapeout through IHP pending</span>
+      <span class="badge">v2.2 signed off · tapeout at IHP handled by Symbiotic EDA</span>
       <dl class="facts">
         <div><dt>Die</dt><dd>2.2 × 2.2 mm</dd></div>
         <div><dt>Cells</dt><dd>~70k</dd></div>
@@ -151,11 +151,11 @@
         <div><dt>DRC / LVS</dt><dd>0 / match</dd></div>
         <div><dt>Worst IR drop</dt><dd>36 mV</dd></div>
         <div><dt>Power, 0.2 activity</dt><dd>67 mW</dd></div>
-        <div><dt>Pads</dt><dd>16</dd></div>
+        <div><dt>Package</dt><dd>QFN32, 5 × 5 mm</dd></div>
       </dl>
       <div class="toc">
         <a href="#architecture">Architecture</a><a href="#floorplan">Floorplan</a><a href="#signoff">Signoff</a>
-        <a href="#timing">The timing fix</a><a href="#debug">The multiply that hung</a><a href="#next">What's next</a>
+        <a href="#sram">SRAM test block</a><a href="#ci">CI</a><a href="#timing">The timing fix</a><a href="#debug">The multiply that hung</a><a href="#next">What's next</a>
         <a href="https://github.com/RakshithSuresh2001/argo-rv32-systolic-ihp130">Repository</a>
       </div>
     </div>
@@ -176,7 +176,7 @@
           <text class="s" x="56" y="92">RV32IM, multi-cycle MUL</text>
           <text class="s" x="56" y="112">cycle counters, no IRQ</text>
           <!-- bus -->
-          <path class="bus" d="M140 132 V176 H920"/>
+          <path class="bus" d="M140 132 V176 H820"/>
           <text class="l" x="252" y="168">native memory bus · address decode</text>
           <!-- slaves -->
           <g>
@@ -196,12 +196,8 @@
             <text class="t" x="544" y="242">UART TX</text><text class="s" x="544" y="262">115200 baud</text><text class="s" x="544" y="280">0x2000_0000</text>
           </g>
           <g>
-            <path class="bus" d="M740 176 V214"/><rect class="blk" x="670" y="214" width="150" height="78" rx="4"/>
+            <path class="bus" d="M740 176 V214"/><rect class="blk acc" x="670" y="214" width="150" height="78" rx="4"/>
             <text class="t" x="684" y="242">SRAM test block</text><text class="s" x="684" y="262">2 KB · own supply</text><text class="s" x="684" y="280">0x3000_0000</text>
-          </g>
-          <g>
-            <path class="bus" d="M885 176 V214"/><rect class="blk dash" x="840" y="214" width="90" height="78" rx="4"/>
-            <text class="t" x="852" y="242">Reserved</text><text class="s" x="852" y="262">demo block</text><text class="s" x="852" y="280">0x4000_…</text>
           </g>
           <!-- SPI -->
           <rect class="blk" x="40" y="340" width="200" height="66" rx="4"/>
@@ -218,13 +214,13 @@
           <!-- pads -->
           <text class="l" x="520" y="400">16 pads: clk, rst_n, UART, 4 SPI, sram_en, 7 supply</text>
         </svg>
-        <figcaption>Block diagram. The accelerator is outlined in copper. The CPU is PicoRV32 and the SRAMs are IHP macros; the array, bus logic, SPI slave and test-block wrapper are my RTL.</figcaption>
+        <figcaption>Block diagram. The systolic array and the SRAM test block are outlined in copper. The CPU is PicoRV32 and the program and data SRAMs are IHP macros; the array, bus logic, SPI slave and test-block wrapper are my RTL.</figcaption>
       </figure>
       <div class="prose">
         <h3>Design choices</h3>
         <ul class="list">
           <li><b>Multi-cycle multiplier, no divider.</b> PicoRV32's fast multiplier missed 100 MHz at the slow corner, and nothing in the firmware needs division.</li>
-          <li><b>A detachable test block.</b> The 2 KB SRAM test macro has its own supply pad and a strap pin. With the strap low its clock is gated off, its outputs are masked and its address range reads 0, so a dead test macro can't hang the CPU.</li>
+          <li><b>A detachable test block.</b> A 2 KB SRAM macro included to validate it in silicon, isolated so that it can never take the rest of the chip down with it. <a href="#sram">More below.</a></li>
           <li><b>Registered CPU reset.</b> The reset that drives the 1,024-flop register file is registered, which took it off the critical path and cut slow-corner TNS from -211 ns to -18.7 ns.</li>
         </ul>
       </div>
@@ -257,6 +253,30 @@
         </div>
         <div class="blockinfo" id="blockinfo" aria-live="polite">Copper is Metal4, mostly the power straps. The light ring is TopMetal1, which carries the core supply rings and the bond pads.</div>
       </div>
+    </div>
+  </section>
+
+  <section id="sram">
+    <div class="wrap prose">
+      <h2>An SRAM block for silicon validation</h2>
+      <p>Besides the two IHP SRAM macros that hold code and data, Argo carries a third, 2 KB 6T SRAM macro from an open-source SRAM generator. It's there to be measured: Argo gives it a CPU, a self-test and two known-good SRAMs right next to it to compare against.</p>
+      <p>A new macro on its first tapeout might not work, so the integration was built around one rule: if it's dead, the rest of Argo has to be unaffected. I implemented:</p>
+      <ul class="list">
+        <li><b>Its own supply.</b> A dedicated VDD_SRAM pad, a separate core ring and Metal4 straps that only reach the macro, so it can be powered off, measured on its own, or tied to the core supply.</li>
+        <li><b>A strap pin to detach it.</b> With <code>sram_en</code> low, the macro's clock is gated off with an integrated clock-gating cell, every input is held at 0, its outputs are masked and its address range reads back 0. The CPU can't hang on it, even if its outputs float.</li>
+        <li><b>A bus wrapper and status register</b> at <code>0x3000_0000</code>, so firmware can tell whether the block is attached before touching it.</li>
+        <li><b>Physical fixes to its views.</b> The macro needed its placement boundary stripped for the density check and a local patch for one contact-overlap rule before it passed IHP's DRC.</li>
+        <li><b>Tests for both straps.</b> March C- and address-in-data tests, the power-on self-test (which reports <code>S+</code>, <code>S-</code> or <code>S0</code> for detached), and regression runs with the strap high, low, and low with the macro outputs forced to X.</li>
+      </ul>
+      <p>On the bench, the plan is to run the self-test with the block attached, then sweep its supply separately to find where it stops working.</p>
+    </div>
+  </section>
+
+  <section id="ci">
+    <div class="wrap prose">
+      <h2>Built and validated in CI</h2>
+      <p>Argo is built and checked automatically on <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s BlueGarden CI/CD system: Verilator lint, firmware build, the self-checking RTL regression, the full RTL-to-GDS flow, the signoff gate and gate-level simulation. Every stage passes or fails on its own checks, so a change that breaks DRC or a test is caught on that change, not at tapeout.</p>
+      <p>BlueGarden is self-hosted by Symbiotic EDA, so the flow doesn't depend on a hosting provider's future pricing or policy changes.</p>
     </div>
   </section>
 
@@ -339,10 +359,10 @@ PCPI v=1 any=1 wait=1 wq=1 mwait=<span class="hl">x</span>   cnt=xxxxxxx fin=<sp
     <div class="wrap prose">
       <h2>What's next</h2>
       <ul class="list">
-        <li><b>Tapeout and bring-up.</b> A draft QFN32 pinout is done. Bring-up will use a Raspberry Pi over SPI and the power-on self-test as the first check of each die.</li>
-        <li><b>Feeding the array.</b> One 8x8 matrix-vector product takes about 650 cycles on the array against 6,200 on the CPU, and most of the array's time is the CPU moving data over the bus. A DMA engine is the obvious v3 change.</li>
+        <li><b>Tapeout and packaging.</b> The tapeout at <a href="https://www.ihp-microelectronics.com">IHP</a> is handled by <a href="https://www.symbioticeda.com">Symbiotic EDA</a>. The dies go into a QFN32 package, 5 × 5 mm, with 16 of the 32 leads bonded and the exposed pad tied to ground on the board.</li>
+        <li><b>Bring-up.</b> A Raspberry Pi loads programs over SPI, and the power-on self-test is the first check on every die.</li>
+        <li><b>Feeding the array.</b> The array finishes a matrix-vector product in a few cycles, but the CPU spends far longer moving operands over the bus. A DMA engine is the obvious v3 change.</li>
         <li><b>Resets where they cost nothing.</b> Adding resets to the multiplier's control flops would remove the need for testbench initialization in gate-level simulation.</li>
-        <li><b>Continuous signoff.</b> The flow, signoff gate and gate-level tests are scripted to run in CI on every change.</li>
       </ul>
     </div>
   </section>
@@ -351,7 +371,7 @@ PCPI v=1 any=1 wait=1 wq=1 mwait=<span class="hl">x</span>   cnt=xxxxxxx fin=<sp
 <footer>
   <div class="wrap">
     <span><a href="index.html">Rakshith Suresh</a> · <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=rakshithsuresh2001@gmail.com" target="_blank" rel="noopener">rakshithsuresh2001@gmail.com</a></span>
-    <span>Numbers from run sram_full6, tag argo-v2.2-signoff</span>
+    <span>Tapeout at IHP through Symbiotic EDA · numbers from run sram_full6, tag argo-v2.2-signoff</span>
   </div>
 </footer>
 

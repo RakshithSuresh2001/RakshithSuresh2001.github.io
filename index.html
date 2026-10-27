@@ -180,9 +180,9 @@
         </div>
 
         <div>
-          <span class="badge">Signed off · tapeout through IHP pending</span>
+          <span class="badge">Signed off · tapeout at IHP handled by Symbiotic EDA</span>
           <h3>RISC-V SoC with an 8x8 int8 systolic array</h3>
-          <p>PicoRV32 (RV32IM), two 4 KB SRAM macros, a detachable SRAM test block on its own supply, an SPI boot loader and UART, and a 16-pad IO ring. Signed off with KLayout only, since the PDK has no Magic support.</p>
+          <p>PicoRV32 (RV32IM), two 4 KB SRAM macros, an SPI boot loader and UART, and a 16-pad IO ring in a QFN32 package. It also carries a 2 KB SRAM block for silicon validation, on its own supply and detachable by a strap pin. Signed off with KLayout only, and built and checked automatically on <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s self-hosted BlueGarden CI/CD.</p>
           <p>Gate-level simulation of a power-on self-test hung on the first multiply. I traced it to X-pessimism in a counter with no reset, proved the logic correct with a probe, and documented it as a simulation-only waiver.</p>
           <dl class="facts">
             <div><dt>DRC / LVS / antenna</dt><dd>0 / match / 0</dd></div>
@@ -190,7 +190,7 @@
             <div><dt>Worst IR drop</dt><dd>36 mV (3.0%)</dd></div>
             <div><dt>Die</dt><dd>2.2 × 2.2 mm</dd></div>
             <div><dt>Gate-level POST</dt><dd>pass, zero-delay + SDF</dd></div>
-            <div><dt>Array vs CPU, 8x8 GEMV</dt><dd>9.6x</dd></div>
+            <div><dt>Package</dt><dd>QFN32, 5 × 5 mm</dd></div>
           </dl>
           <div class="links">
             <a href="argo.html"><b>Read the full write-up</b></a>
@@ -314,7 +314,7 @@
   var INFO = {
     logic: ["Standard-cell logic", "PicoRV32 (RV32IM), the 8x8 int8 systolic array, SPI boot loader and UART. About 70k cells on IHP SG13CMOS5L."],
     sram:  ["4 KB SRAM macros", "Two IHP 1024x32 macros behind a small word controller. One holds code, the other data."],
-    stest: ["SRAM test block", "A 2 KB 6T macro on its own VDD_SRAM pad. A strap pin detaches it so a faulty block can never hang the chip."],
+    stest: ["SRAM test block", "A 2 KB 6T macro included to validate it in silicon. Its own VDD_SRAM pad, and a strap pin that detaches it so a faulty block can never hang the chip."],
     ring:  ["IO ring", "16 pads on 70 µm bond pads: 7 inputs, 2 outputs and 7 supply, with ESD and clamp cells."]
   };
   var box = document.getElementById("blockinfo"), base = box.innerHTML, sel = null;
