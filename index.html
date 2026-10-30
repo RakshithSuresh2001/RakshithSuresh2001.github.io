@@ -100,11 +100,13 @@
   .proj .metric { font-family: var(--mono); font-size: 13px; margin-top: 8px; }
 
   /* about */
-  .about { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; margin-top: 24px; }
+  .about { display: grid; grid-template-columns: 1fr; gap: 48px; margin-top: 24px; max-width: 640px; }
   .about h3 { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 10px; }
   .edu > div { padding: 12px 0; border-bottom: 1px solid var(--line); }
   .edu > div:first-child { border-top: 1px solid var(--line); }
   .edu .when { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+  .toolbox { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); max-width: 760px; }
+  .toolbox h3 { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 10px; }
   .tools { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; font-size: 15px; }
   .tools dt { color: var(--muted); }
 
@@ -149,6 +151,16 @@
         <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=rakshithsuresh2001@gmail.com" target="_blank" rel="noopener">rakshithsuresh2001@gmail.com</a>
         <a href="https://www.linkedin.com/in/rakshith-suresh-890329258/">LinkedIn</a>
         <a href="https://github.com/RakshithSuresh2001">GitHub</a>
+      </div>
+      <div class="toolbox">
+        <h3>Tools</h3>
+        <dl class="tools">
+            <dt>HDL</dt><dd>SystemVerilog, Verilog, SVA</dd>
+            <dt>Verification</dt><dd>UVM, cocotb, VCS, Verilator, Icarus, SymbiYosys, Spike</dd>
+            <dt>Physical design</dt><dd>OpenROAD, LibreLane, Yosys, OpenSTA, KLayout, Innovus, PrimeTime</dd>
+            <dt>PDKs</dt><dd>IHP SG13G2 and SG13CMOS5L, Sky130, GF180, ASAP7</dd>
+            <dt>Programming</dt><dd>Python, Tcl, Perl, C and C++</dd>
+          </dl>
       </div>
     </div>
   </header>
@@ -276,16 +288,6 @@
             <div><div class="when">2025 – 2027</div>MS Electrical Engineering, VLSI and Digital Design<br><span style="color:var(--muted)">University of Southern California</span></div>
             <div><div class="when">2020 – 2024</div>BE Electronics and Communication Engineering<br><span style="color:var(--muted)">Visvesvaraya Technological University, Bangalore</span></div>
           </div>
-        </div>
-        <div>
-          <h3>Tools</h3>
-          <dl class="tools">
-            <dt>HDL</dt><dd>SystemVerilog, Verilog, SVA</dd>
-            <dt>Verification</dt><dd>UVM, cocotb, VCS, Verilator, Icarus, SymbiYosys, Spike</dd>
-            <dt>Physical design</dt><dd>OpenROAD, LibreLane, Yosys, OpenSTA, KLayout, Innovus, PrimeTime</dd>
-            <dt>PDKs</dt><dd>IHP SG13G2 and SG13CMOS5L, Sky130, GF180, ASAP7</dd>
-            <dt>Programming</dt><dd>Python, Tcl, Perl, C and C++</dd>
-          </dl>
         </div>
       </div>
     </div>

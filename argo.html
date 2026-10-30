@@ -65,6 +65,10 @@
   .facts div { padding: 14px 16px 14px 0; border-bottom: 1px solid var(--line); }
   .facts dt { font-size: 13px; color: var(--muted); }
   .facts dd { font-family: var(--mono); font-size: 16px; }
+  .flow { margin-top: 28px; }
+  .flow h3 { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 10px; }
+  .flow .tools { display: grid; grid-template-columns: 150px 1fr; gap: 6px 16px; font-size: 15px; }
+  .flow .tools dt { color: var(--muted); }
   .toc { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 24px; font-size: 14px; }
 
   /* block diagram */
@@ -115,6 +119,8 @@
   @media (max-width: 820px) {
     .wrap { padding: 0 16px; }
     .facts { grid-template-columns: 1fr 1fr; }
+    .flow .tools { grid-template-columns: 1fr; gap: 0; }
+    .flow .tools dd { margin-bottom: 8px; }
     nav ul .opt { display: none; }
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
@@ -153,6 +159,17 @@
         <div><dt>Power, 0.2 activity</dt><dd>67 mW</dd></div>
         <div><dt>Package</dt><dd>QFN32, 5 × 5 mm</dd></div>
       </dl>
+      <div class="flow">
+        <h3>Tools used</h3>
+        <dl class="tools">
+          <dt>RTL and firmware</dt><dd>SystemVerilog, Verilator lint, Icarus Verilog, RISC-V GCC</dd>
+          <dt>Synthesis</dt><dd>Yosys</dd>
+          <dt>Place and route</dt><dd>OpenROAD through LibreLane 3</dd>
+          <dt>Signoff</dt><dd>KLayout DRC and LVS (IHP decks), OpenSTA, OpenROAD PSM for IR drop</dd>
+          <dt>Gate-level sim</dt><dd>Icarus Verilog, zero-delay and SDF-annotated</dd>
+          <dt>CI</dt><dd>Symbiotic EDA's BlueGarden</dd>
+        </dl>
+      </div>
       <div class="toc">
         <a href="#architecture">Architecture</a><a href="#floorplan">Floorplan</a><a href="#signoff">Signoff</a>
         <a href="#sram">SRAM test block</a><a href="#ci">CI</a><a href="#timing">The timing fix</a><a href="#debug">The multiply that hung</a><a href="#next">What's next</a>
