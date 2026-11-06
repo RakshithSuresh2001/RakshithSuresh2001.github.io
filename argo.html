@@ -148,7 +148,7 @@
       <div class="crumb"><a href="index.html">Home</a> / Argo</div>
       <h1>Argo: a RISC-V SoC on IHP 130 nm</h1>
       <p class="sub">A PicoRV32 core with an 8x8 int8 systolic array, taken from RTL to signoff-clean GDS on IHP SG13CMOS5L with open-source tools and KLayout-only signoff.</p>
-      <span class="badge">v2.2 signed off · tapeout at IHP handled by Symbiotic EDA</span>
+      <span class="badge">v2.2 taped out Nov 2026 · tapeout at IHP handled by Symbiotic EDA</span>
       <dl class="facts">
         <div><dt>Die</dt><dd>2.2 × 2.2 mm</dd></div>
         <div><dt>Cells</dt><dd>~70k</dd></div>
@@ -166,7 +166,7 @@
           <dt>Synthesis</dt><dd>Yosys</dd>
           <dt>Place and route</dt><dd>OpenROAD through LibreLane 3</dd>
           <dt>Signoff</dt><dd>KLayout DRC and LVS (IHP decks), OpenSTA, OpenROAD PSM for IR drop</dd>
-          <dt>Gate-level sim</dt><dd>Icarus Verilog, zero-delay and SDF-annotated</dd>
+          <dt>Gate-level sim</dt><dd>Icarus Verilog, zero-delay and SDF-annotated (cell delays)</dd>
           <dt>CI</dt><dd>Symbiotic EDA's BlueGarden</dd>
         </dl>
       </div>
@@ -315,7 +315,7 @@
             <tr><td>Setup, slow (1.08 V, 125 °C)</td><td class="n"><span class="warn">−1.38 ns</span></td><td>About 88 MHz worst case. Waived; the clock comes from a pin</td></tr>
             <tr><td>Hold, all corners</td><td class="n"><span class="pass">+0.035 ns</span></td><td>Worst at the fast corner</td></tr>
             <tr><td>Static IR drop</td><td class="n"><span class="pass">28 / 36 mV</span></td><td>VDD / VSS, sources at the real supply pads, 0.2 toggle rate, under the 5% budget</td></tr>
-            <tr><td>Gate-level simulation</td><td class="n"><span class="pass">pass</span></td><td>Power-on self-test on the routed netlist, both strap settings, zero-delay and typical SDF</td></tr>
+            <tr><td>Gate-level simulation</td><td class="n"><span class="pass">pass</span></td><td>Power-on self-test on the routed netlist, both strap settings, zero-delay and SDF with cell delays</td></tr>
           </tbody>
         </table>
       </div>
@@ -376,9 +376,10 @@ PCPI v=1 any=1 wait=1 wq=1 mwait=<span class="hl">x</span>   cnt=xxxxxxx fin=<sp
     <div class="wrap prose">
       <h2>What's next</h2>
       <ul class="list">
-        <li><b>Tapeout and packaging.</b> The tapeout at <a href="https://www.ihp-microelectronics.com">IHP</a> is handled by <a href="https://www.symbioticeda.com">Symbiotic EDA</a>. The dies go into a QFN32 package, 5 × 5 mm, with 16 of the 32 leads bonded and the exposed pad tied to ground on the board.</li>
-        <li><b>Bring-up.</b> A Raspberry Pi loads programs over SPI, and the power-on self-test is the first check on every die.</li>
+        <li><b>Packaging.</b> v2.2 was submitted in November 2026. The tapeout at <a href="https://www.ihp-microelectronics.com">IHP</a> is handled by <a href="https://www.symbioticeda.com">Symbiotic EDA</a>. The dies go into a QFN32 package, 5 × 5 mm, with 16 of the 32 leads bonded and the exposed pad tied to ground on the board.</li>
+        <li><b>Bring-up.</b> A Raspberry Pi loads programs over SPI, and the power-on self-test is the first check on every die. An Arty A7 build of the same RTL is set up to rehearse bring-up before the chips arrive.</li>
         <li><b>Feeding the array.</b> The array finishes a matrix-vector product in a few cycles, but the CPU spends far longer moving operands over the bus. A DMA engine is the obvious v3 change.</li>
+        <li><b>Design for test.</b> Argo v2.2 has no scan chains, so v3 adds scan insertion, ATPG patterns and a hardware memory BIST.</li>
         <li><b>Resets where they cost nothing.</b> Adding resets to the multiplier's control flops would remove the need for testbench initialization in gate-level simulation.</li>
       </ul>
     </div>

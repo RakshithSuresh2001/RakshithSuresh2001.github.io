@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Rakshith Suresh · VLSI physical design and verification</title>
-<meta name="description" content="MS EE at USC Viterbi. RTL to signoff-clean GDS on open-source tools. Current chip: Argo, a RISC-V SoC with an int8 systolic array on IHP 130 nm.">
+<meta name="description" content="MS EE at USC Viterbi. RTL to signoff-clean GDS on open-source tools. Latest chip: Argo, a RISC-V SoC with an int8 systolic array, taped out on IHP 130 nm.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://rakshithsuresh2001.github.io/">
 <meta property="og:title" content="Rakshith Suresh">
-<meta property="og:description" content="VLSI physical design and design verification. Current chip: Argo, a RISC-V SoC with an int8 systolic array on IHP 130 nm.">
+<meta property="og:description" content="VLSI physical design and design verification. Latest chip: Argo, a RISC-V SoC with an int8 systolic array, taped out on IHP 130 nm.">
 <meta property="og:image" content="https://rakshithsuresh2001.github.io/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -168,7 +168,7 @@
   <section id="argo">
     <div class="wrap">
       <h2>Argo</h2>
-      <p class="lede">My current chip: a RISC-V SoC with an 8x8 int8 systolic array on IHP's 130 nm process, built and signed off with open-source tools. Select a block to see what it is.</p>
+      <p class="lede">My latest chip, taped out in November 2026: a RISC-V SoC with an 8x8 int8 systolic array on IHP's 130 nm process, built and signed off with open-source tools. Select a block to see what it is.</p>
 
       <div class="argo">
         <div>
@@ -192,7 +192,7 @@
         </div>
 
         <div>
-          <span class="badge">Signed off · tapeout at IHP handled by Symbiotic EDA</span>
+          <span class="badge">Taped out Nov 2026 · tapeout at IHP handled by Symbiotic EDA</span>
           <h3>RISC-V SoC with an 8x8 int8 systolic array</h3>
           <p>PicoRV32 (RV32IM), two 4 KB SRAM macros, an SPI boot loader and UART, and a 16-pad IO ring in a QFN32 package. It also carries a 2 KB SRAM block for silicon validation, on its own supply and detachable by a strap pin. Signed off with KLayout only, and built and checked automatically on <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s self-hosted BlueGarden CI/CD.</p>
           <p>Gate-level simulation of a power-on self-test hung on the first multiply. I traced it to X-pessimism in a counter with no reset, proved the logic correct with a probe, and documented it as a simulation-only waiver.</p>
@@ -201,7 +201,7 @@
             <div><dt>Clock, typical corner</dt><dd>100 MHz, +2.82 ns</dd></div>
             <div><dt>Worst IR drop</dt><dd>36 mV (3.0%)</dd></div>
             <div><dt>Die</dt><dd>2.2 × 2.2 mm</dd></div>
-            <div><dt>Gate-level POST</dt><dd>pass, zero-delay + SDF</dd></div>
+            <div><dt>Gate-level POST</dt><dd>pass on the routed netlist</dd></div>
             <div><dt>Package</dt><dd>QFN32, 5 × 5 mm</dd></div>
           </dl>
           <div class="links">
