@@ -173,12 +173,13 @@
       <div class="argo">
         <div>
           <div class="die">
-            <img src="argo_die.jpg" alt="Argo layout, metal layers: two SRAM macros in the core, the SRAM test block at top right, the IO ring around the edge" width="900" height="900">
+            <img src="argo_die.jpg" alt="Argo layout, metal layers: two SRAM macros in the core, the SRAM test block at top right, a collaborator's test structure at top left, the IO ring around the edge" width="900" height="900">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="group" aria-label="Argo floorplan">
               <path class="r ring" data-k="ring" fill-rule="evenodd" d="M0.9 0.9H99.1V99.1H0.9Z M15.6 15.6V84.4H84.4V15.6Z"/>
               <rect class="r" data-k="logic" x="15.6" y="15.6" width="68.8" height="68.8"/>
-              <rect class="r" data-k="sram" x="36.2" y="26.5" width="18.6" height="15"/>
-              <rect class="r" data-k="sram" x="36.2" y="67.6" width="18.6" height="15"/>
+              <rect class="r" data-k="sram" x="47.3" y="26.5" width="18.6" height="15"/>
+              <rect class="r" data-k="sram" x="47.3" y="67.6" width="18.6" height="15"/>
+              <rect class="r" data-k="other" x="17.0" y="17.0" width="26.8" height="26.8"/>
               <rect class="r" data-k="stest" x="66.3" y="16.9" width="16.8" height="7.5"/>
             </svg>
           </div>
@@ -186,6 +187,7 @@
             <button type="button" data-k="logic" aria-pressed="false">Logic</button>
             <button type="button" data-k="sram" aria-pressed="false">SRAM</button>
             <button type="button" data-k="stest" aria-pressed="false">SRAM test block</button>
+            <button type="button" data-k="other" aria-pressed="false">Test structure</button>
             <button type="button" data-k="ring" aria-pressed="false">IO ring</button>
           </div>
           <div class="blockinfo" id="blockinfo" aria-live="polite">Metal layers only, fill hidden. <a href="argo_die_full.jpg">Full resolution</a></div>
@@ -194,12 +196,12 @@
         <div>
           <span class="badge">Taped out Nov 2026 · tapeout at IHP handled by Symbiotic EDA</span>
           <h3>RISC-V SoC with an 8x8 int8 systolic array</h3>
-          <p>PicoRV32 (RV32IM), two 4 KB SRAM macros, an SPI boot loader and UART, and a 16-pad IO ring in a QFN32 package. It also carries a 2 KB SRAM block for silicon validation, on its own supply and detachable by a strap pin. Signed off with KLayout only, and built and checked automatically on <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s self-hosted BlueGarden CI/CD.</p>
+          <p>PicoRV32 (RV32IM), two 4 KB SRAM macros, an SPI boot loader and UART, and an 18-pad IO ring in a QFN32 package. It also carries a 2 KB SRAM block for silicon validation, on its own supply and detachable by a strap pin. Signed off with KLayout only, with a CI pipeline set up for <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s self-hosted BlueGarden CI/CD.</p>
           <p>Gate-level simulation of a power-on self-test hung on the first multiply. I traced it to X-pessimism in a counter with no reset, proved the logic correct with a probe, and documented it as a simulation-only waiver.</p>
           <dl class="facts">
             <div><dt>DRC / LVS / antenna</dt><dd>0 / match / 0</dd></div>
-            <div><dt>Clock, typical corner</dt><dd>100 MHz, +2.82 ns</dd></div>
-            <div><dt>Worst IR drop</dt><dd>36 mV (3.0%)</dd></div>
+            <div><dt>Clock, typical corner</dt><dd>100 MHz, +1.75 ns</dd></div>
+            <div><dt>Worst IR drop</dt><dd>50 mV (4.2%)</dd></div>
             <div><dt>Die</dt><dd>2.2 × 2.2 mm</dd></div>
             <div><dt>Gate-level POST</dt><dd>pass on the routed netlist</dd></div>
             <div><dt>Package</dt><dd>QFN32, 5 × 5 mm</dd></div>
@@ -297,7 +299,7 @@
 <footer>
   <div class="wrap">
     <span>Rakshith Suresh · Los Angeles</span>
-    <span>Layout rendered from the Argo v2.2 GDS</span>
+    <span>Layout rendered from the Argo tape-out GDS</span>
   </div>
 </footer>
 
@@ -314,10 +316,11 @@
 
   // floorplan
   var INFO = {
-    logic: ["Standard-cell logic", "PicoRV32 (RV32IM), the 8x8 int8 systolic array, SPI boot loader and UART. About 70k cells on IHP SG13CMOS5L."],
+    logic: ["Standard-cell logic", "PicoRV32 (RV32IM), the 8x8 int8 systolic array, SPI boot loader and UART. About 68k cells on IHP SG13CMOS5L."],
     sram:  ["4 KB SRAM macros", "Two IHP 1024x32 macros behind a small word controller. One holds code, the other data."],
     stest: ["SRAM test block", "A 2 KB 6T macro included to validate it in silicon. Its own VDD_SRAM pad, and a strap pin that detaches it so a faulty block can never hang the chip."],
-    ring:  ["IO ring", "16 pads on 70 µm bond pads: 7 inputs, 2 outputs and 7 supply, with ESD and clamp cells."]
+    other: ["Test structure", "A small test structure from a collaborator, with its own strap and supply pad. It isn't part of the Argo repository."],
+    ring:  ["IO ring", "18 pads on 70 µm bond pads: 8 inputs, 2 outputs and 8 supply, with ESD and clamp cells."]
   };
   var box = document.getElementById("blockinfo"), base = box.innerHTML, sel = null;
   var shapes = document.querySelectorAll(".die .r"), btns = document.querySelectorAll(".legend button");

@@ -148,15 +148,15 @@
       <div class="crumb"><a href="index.html">Home</a> / Argo</div>
       <h1>Argo: a RISC-V SoC on IHP 130 nm</h1>
       <p class="sub">A PicoRV32 core with an 8x8 int8 systolic array, taken from RTL to signoff-clean GDS on IHP SG13CMOS5L with open-source tools and KLayout-only signoff.</p>
-      <span class="badge">v2.2 taped out Nov 2026 · tapeout at IHP handled by Symbiotic EDA</span>
+      <span class="badge">Taped out Nov 2026 · tapeout at IHP handled by Symbiotic EDA</span>
       <dl class="facts">
         <div><dt>Die</dt><dd>2.2 × 2.2 mm</dd></div>
-        <div><dt>Cells</dt><dd>~70k</dd></div>
+        <div><dt>Cells</dt><dd>~68k</dd></div>
         <div><dt>Typical corner</dt><dd>100 MHz</dd></div>
-        <div><dt>Slow corner</dt><dd>~88 MHz</dd></div>
+        <div><dt>Slow corner</dt><dd>~76 MHz</dd></div>
         <div><dt>DRC / LVS</dt><dd>0 / match</dd></div>
-        <div><dt>Worst IR drop</dt><dd>36 mV</dd></div>
-        <div><dt>Power, 0.2 activity</dt><dd>67 mW</dd></div>
+        <div><dt>Worst IR drop</dt><dd>50 mV</dd></div>
+        <div><dt>Power, default activity</dt><dd>45 mW</dd></div>
         <div><dt>Package</dt><dd>QFN32, 5 × 5 mm</dd></div>
       </dl>
       <div class="flow">
@@ -167,7 +167,7 @@
           <dt>Place and route</dt><dd>OpenROAD through LibreLane 3</dd>
           <dt>Signoff</dt><dd>KLayout DRC and LVS (IHP decks), OpenSTA, OpenROAD PSM for IR drop</dd>
           <dt>Gate-level sim</dt><dd>Icarus Verilog, zero-delay and SDF-annotated (cell delays)</dd>
-          <dt>CI</dt><dd>Symbiotic EDA's BlueGarden</dd>
+          <dt>CI</dt><dd>Symbiotic EDA's BlueGarden (pipeline set up)</dd>
         </dl>
       </div>
       <div class="toc">
@@ -229,7 +229,7 @@
           <path class="wire" d="M745 340 V292" marker-end="url(#ar)"/>
           <text class="l" x="690" y="360">sram_en strap pin</text>
           <!-- pads -->
-          <text class="l" x="520" y="400">16 pads: clk, rst_n, UART, 4 SPI, sram_en, 7 supply</text>
+          <text class="l" x="520" y="400">18 pads: clk, rst_n, UART, 4 SPI, sram_en, 7 supply, 2 for a test structure</text>
         </svg>
         <figcaption>Block diagram. The systolic array and the SRAM test block are outlined in copper. The CPU is PicoRV32 and the program and data SRAMs are IHP macros; the array, bus logic, SPI slave and test-block wrapper are my RTL.</figcaption>
       </figure>
@@ -247,7 +247,7 @@
   <section id="floorplan">
     <div class="wrap">
       <h2>Floorplan</h2>
-      <p class="muted prose">Metal layers from the v2.2 GDS, fill hidden. Scroll or use + and − to zoom, drag to pan, and pick a block to highlight it.</p>
+      <p class="muted prose">Metal layers from the tape-out GDS, fill hidden. Scroll or use + and − to zoom, drag to pan, and pick a block to highlight it.</p>
       <div style="margin-top:24px">
         <div class="viewer" id="viewer">
           <div class="stage" id="stage">
@@ -255,8 +255,9 @@
             <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
               <path class="r" data-k="ring" fill-rule="evenodd" d="M0.9 0.9H99.1V99.1H0.9Z M15.6 15.6V84.4H84.4V15.6Z"/>
               <rect class="r" data-k="logic" x="15.6" y="15.6" width="68.8" height="68.8"/>
-              <rect class="r" data-k="sram" x="36.2" y="26.5" width="18.6" height="15"/>
-              <rect class="r" data-k="sram" x="36.2" y="67.6" width="18.6" height="15"/>
+              <rect class="r" data-k="sram" x="47.3" y="26.5" width="18.6" height="15"/>
+              <rect class="r" data-k="sram" x="47.3" y="67.6" width="18.6" height="15"/>
+              <rect class="r" data-k="other" x="17.0" y="17.0" width="26.8" height="26.8"/>
               <rect class="r" data-k="stest" x="66.3" y="16.9" width="16.8" height="7.5"/>
             </svg>
           </div>
@@ -266,6 +267,7 @@
           <button type="button" data-k="logic" aria-pressed="false">Logic</button>
           <button type="button" data-k="sram" aria-pressed="false">SRAM macros</button>
           <button type="button" data-k="stest" aria-pressed="false">SRAM test block</button>
+          <button type="button" data-k="other" aria-pressed="false">Test structure</button>
           <button type="button" data-k="ring" aria-pressed="false">IO ring</button>
         </div>
         <div class="blockinfo" id="blockinfo" aria-live="polite">Copper is Metal4, mostly the power straps. The light ring is TopMetal1, which carries the core supply rings and the bond pads.</div>
@@ -291,8 +293,8 @@
 
   <section id="ci">
     <div class="wrap prose">
-      <h2>Built and validated in CI</h2>
-      <p>Argo is built and checked automatically on <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s BlueGarden CI/CD system: Verilator lint, firmware build, the self-checking RTL regression, the full RTL-to-GDS flow, the signoff gate and gate-level simulation. Every stage passes or fails on its own checks, so a change that breaks DRC or a test is caught on that change, not at tapeout.</p>
+      <h2>Continuous integration</h2>
+      <p>Argo's pipeline is set up for <a href="https://www.symbioticeda.com">Symbiotic EDA</a>’s BlueGarden CI/CD system: Verilator lint, firmware build, the self-checking RTL regression, the full RTL-to-GDS flow, the signoff gate and gate-level simulation. Once it runs, every stage passes or fails on its own checks, so a change that breaks DRC or a test is caught on that change, not at tapeout. Today the same steps run locally through the same scripts.</p>
       <p>BlueGarden is self-hosted by Symbiotic EDA, so the flow doesn't depend on a hosting provider's future pricing or policy changes.</p>
     </div>
   </section>
@@ -310,16 +312,16 @@
             <tr><td>KLayout DRC</td><td class="n"><span class="pass">0</span></td><td>IHP SG13CMOS5L deck</td></tr>
             <tr><td>LVS</td><td class="n"><span class="pass">match</span></td><td>Standard cells and top-level wiring; pads and macros black-boxed</td></tr>
             <tr><td>Density</td><td class="n"><span class="pass">0</span></td><td>After shaped top-up fill</td></tr>
-            <tr><td>Antenna (KLayout)</td><td class="n"><span class="pass">0</span></td><td>OpenROAD's LEF-based checker flags 239 nets; the signoff deck is clean</td></tr>
-            <tr><td>Setup, typical (1.20 V, 25 °C)</td><td class="n"><span class="pass">+2.82 ns</span></td><td>at 10 ns</td></tr>
-            <tr><td>Setup, slow (1.08 V, 125 °C)</td><td class="n"><span class="warn">−1.38 ns</span></td><td>About 88 MHz worst case. Waived; the clock comes from a pin</td></tr>
-            <tr><td>Hold, all corners</td><td class="n"><span class="pass">+0.035 ns</span></td><td>Worst at the fast corner</td></tr>
-            <tr><td>Static IR drop</td><td class="n"><span class="pass">28 / 36 mV</span></td><td>VDD / VSS, sources at the real supply pads, 0.2 toggle rate, under the 5% budget</td></tr>
-            <tr><td>Gate-level simulation</td><td class="n"><span class="pass">pass</span></td><td>Power-on self-test on the routed netlist, both strap settings, zero-delay and SDF with cell delays</td></tr>
+            <tr><td>Antenna (KLayout)</td><td class="n"><span class="pass">0</span></td><td>OpenROAD's LEF-based checker is more pessimistic; the signoff deck is clean</td></tr>
+            <tr><td>Setup, typical (1.20 V, 25 °C)</td><td class="n"><span class="pass">+1.75 ns</span></td><td>at 10 ns</td></tr>
+            <tr><td>Setup, slow (1.08 V, 125 °C)</td><td class="n"><span class="warn">−3.16 ns</span></td><td>About 76 MHz worst case. Waived; the clock comes from a pin</td></tr>
+            <tr><td>Hold, all corners</td><td class="n"><span class="pass">+0.039 ns</span></td><td>Worst at the fast corner</td></tr>
+            <tr><td>Static IR drop</td><td class="n"><span class="pass">29 / 50 mV</span></td><td>VDD / VSS, sources at the real supply pads, 0.2 toggle rate, under the 5% budget</td></tr>
+            <tr><td>Gate-level simulation</td><td class="n"><span class="pass">pass</span></td><td>Power-on self-test on the routed netlist</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="muted prose">Every exception is written up with its reason, scope and evidence in <a href="https://github.com/RakshithSuresh2001/argo-rv32-systolic-ihp130/blob/main/WAIVERS.md">WAIVERS.md</a>.</p>
+      <p class="muted prose">Numbers are from the tape-out run. The die also carries a small test structure from a collaborator, with its own strap and supply pad; it isn't part of the repository. Every exception is written up with its reason, scope and evidence in <a href="https://github.com/RakshithSuresh2001/argo-rv32-systolic-ihp130/blob/main/WAIVERS.md">WAIVERS.md</a>.</p>
     </div>
   </section>
 
@@ -376,10 +378,10 @@ PCPI v=1 any=1 wait=1 wq=1 mwait=<span class="hl">x</span>   cnt=xxxxxxx fin=<sp
     <div class="wrap prose">
       <h2>What's next</h2>
       <ul class="list">
-        <li><b>Packaging.</b> v2.2 was submitted in November 2026. The tapeout at <a href="https://www.ihp-microelectronics.com">IHP</a> is handled by <a href="https://www.symbioticeda.com">Symbiotic EDA</a>. The dies go into a QFN32 package, 5 × 5 mm, with 16 of the 32 leads bonded and the exposed pad tied to ground on the board.</li>
+        <li><b>Packaging.</b> Argo was submitted in November 2026. The tapeout at <a href="https://www.ihp-microelectronics.com">IHP</a> is handled by <a href="https://www.symbioticeda.com">Symbiotic EDA</a>. The dies go into a QFN32 package, 5 × 5 mm, with 18 of the 32 leads bonded and the exposed pad tied to ground on the board.</li>
         <li><b>Bring-up.</b> A Raspberry Pi loads programs over SPI, and the power-on self-test is the first check on every die. An Arty A7 build of the same RTL is set up to rehearse bring-up before the chips arrive.</li>
         <li><b>Feeding the array.</b> The array finishes a matrix-vector product in a few cycles, but the CPU spends far longer moving operands over the bus. A DMA engine is the obvious v3 change.</li>
-        <li><b>Design for test.</b> Argo v2.2 has no scan chains, so v3 adds scan insertion, ATPG patterns and a hardware memory BIST.</li>
+        <li><b>Design for test.</b> Argo has no scan chains, so v3 adds scan insertion, ATPG patterns and a hardware memory BIST.</li>
         <li><b>Resets where they cost nothing.</b> Adding resets to the multiplier's control flops would remove the need for testbench initialization in gate-level simulation.</li>
       </ul>
     </div>
@@ -389,7 +391,7 @@ PCPI v=1 any=1 wait=1 wq=1 mwait=<span class="hl">x</span>   cnt=xxxxxxx fin=<sp
 <footer>
   <div class="wrap">
     <span><a href="index.html">Rakshith Suresh</a> · <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=rakshithsuresh2001@gmail.com" target="_blank" rel="noopener">rakshithsuresh2001@gmail.com</a></span>
-    <span>Tapeout at IHP through Symbiotic EDA · numbers from run sram_full6, tag argo-v2.2-signoff</span>
+    <span>Tapeout at IHP through Symbiotic EDA · numbers from the tape-out run</span>
   </div>
 </footer>
 
@@ -445,10 +447,11 @@ PCPI v=1 any=1 wait=1 wq=1 mwait=<span class="hl">x</span>   cnt=xxxxxxx fin=<sp
 
   // block highlight
   var INFO = {
-    logic: ["Standard-cell logic", "PicoRV32, the systolic array, SPI and UART. About 70k cells, placed around the two SRAM macros."],
+    logic: ["Standard-cell logic", "PicoRV32, the systolic array, SPI and UART. About 68k cells, placed around the macros."],
     sram:  ["SRAM macros", "Two IHP 1024x32 macros, 4 KB each. One holds code, the other data."],
     stest: ["SRAM test block", "A 2 KB 6T macro with its own VDD_SRAM supply, Metal4 straps and core ring."],
-    ring:  ["IO ring", "16 pads on 70 µm bond pads, with two VDD/VSS pairs for the core."]
+    other: ["Test structure", "A small test structure from a collaborator, with its own strap and supply pad. It isn't part of this repository."],
+    ring:  ["IO ring", "18 pads on 70 µm bond pads, with two VDD/VSS pairs for the core."]
   };
   var box = document.getElementById("blockinfo"), base = box.innerHTML, sel = null;
   var shapes = document.querySelectorAll(".viewer .r"), chips = document.querySelectorAll(".chips button");
